@@ -1,0 +1,22 @@
+# secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+credentials*
+secrets*
+
+# raw data exports — designers must `git add -f` if intentionally mock
+*.csv
+*.xlsx
+*.sql
+*.dump
+
+# build/install noise
+node_modules
+dist
+build
+.cache
+*.log
+.DS_Store
