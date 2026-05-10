@@ -1,9 +1,5 @@
-import { hydrateRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { App } from './App';
 
-export default (): void => {
-  const root = document.getElementById('app');
-  if (root) {
-    hydrateRoot(root, <App />);
-  }
-};
+const root = document.getElementById('app');
+if (root) createRoot(root).render(<App />);
