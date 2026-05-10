@@ -3,7 +3,7 @@ import type { SkuConfig } from 'sku';
 const config: SkuConfig = {
   clientEntry: 'src/client.tsx',
   renderEntry: 'src/render.tsx',
-  publicPath: '/',
+  publicPath: process.env.BASE_PATH ?? '/',
   port: 3000,
   // `hosts` controls which Host-header values webpack-dev-server accepts —
   // it is NOT the interface-bind address. The Lima 3000->3000 forward
