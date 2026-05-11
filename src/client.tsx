@@ -1,4 +1,4 @@
-import { hydrateRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { App } from './App';
 
 // -----------------------------------------------------------------------------
@@ -13,16 +13,20 @@ import { App } from './App';
 //              normally call our default export, but sku's middleware
 //              only fires on req.url === "/index.html", which never
 //              matches when Vite base != "/". So nothing calls anything
-//              unless we run something at the top level.
+//              unless we run something at the top level. Vite serves no
+//              SSR'd content, so the entry must use createRoot.
 //     - build: sku generates its own HTML, imports this module via its
-//              vite-client wrapper, and calls `client(clientContext)`.
-//              That requires a default export function.
+//              vite-client wrapper, and calls `client(clientContext)`
+//              against statically pre-rendered HTML (render.tsx fills
+//              #app). That requires a default export AND hydrateRoot.
 //   The hybrid below satisfies both. `import.meta.env.DEV` is tree-shaken
-//   in production builds, so the built bundle exposes only the default.
+//   in production builds, so the built bundle exposes only the default
+//   and only the hydrateRoot branch.
 //
-// DO NOT "simplify" by removing either half. The agent that added React
-// Router on 2026-05-11 removed the dev side-effect to make `sku build`
-// pass; that broke the portal preview with a blank page.
+// DO NOT "simplify" by removing either half, collapsing the DEV branch,
+// or replacing main() instead of wrapping additions inside it. The agent
+// that added React Router on 2026-05-11 removed the dev side-effect to
+// make `sku build` pass; that broke the portal preview with a blank page.
 //
 // Remove this patch when ANY of these hold:
 //   - sku's vite middleware grows base-aware route matching (fires on
@@ -35,7 +39,14 @@ import { App } from './App';
 const main = () => {
   const root = document.getElementById('app');
   if (!root) return;
-  hydrateRoot(root, <App />);
+  if (import.meta.env.DEV) {
+    // `sku start` runs no SSR; #app is empty. createRoot avoids the
+    // hydration-mismatch warning hydrateRoot emits against empty roots.
+    createRoot(root).render(<App />);
+  } else {
+    // `sku build` pre-renders #app via render.tsx; hydrate that.
+    hydrateRoot(root, <App />);
+  }
 };
 
 // Used by `sku build` — sku's vite-client wrapper calls this against the
